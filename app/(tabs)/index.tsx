@@ -1,204 +1,102 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  StyleSheet,
-  Text,
   View,
-  Image,
-  SafeAreaView,
+  Text,
   TextInput,
+  Button,
+  FlatList,
   TouchableOpacity,
 } from "react-native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
-import { LogBox } from "react-native";
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
+import db from "./firebase";
 
-LogBox.ignoreLogs(["props.pointerEvents is deprecated"]); // Ignore warning
+interface Todo {
+  id: string;
+  todo: string;
+}
 
-const HomeScreen = () => {
-  const [text, setText] = useState('');
-  const [menuOpen, setMenuOpen] = useState(false);
+const App: React.FC = () => {
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [input, setInput] = useState<string>("");
 
-  const toggleMenu = () => {
-    setMenuOpen(!menuOpen);
+  // Fetch todos from Firebase on component mount
+  useEffect(() => {
+    const unsubscribe = db
+      .collection("todos")
+      .orderBy("timestamp", "desc")
+      .onSnapshot((snapshot: firebase.firestore.QuerySnapshot) => {
+        setTodos(
+          snapshot.docs.map((doc: firebase.firestore.QueryDocumentSnapshot) => ({
+            id: doc.id,
+            todo: doc.data().todo as string,
+          }))
+        );
+      });
+
+    return () => unsubscribe(); // Cleanup listener on unmount
+  }, []);
+
+  // Add a new todo to Firestore
+  const addTodo = () => {
+    if (input.trim() === "") return;
+
+    db.collection("todos").add({
+      todo: input,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+
+    setInput(""); // Clear input field
+  };
+
+  // Delete a todo from Firestore
+  const deleteTodo = (id: string) => {
+    db.collection("todos").doc(id).delete();
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View>
+    <View style={{ flex: 1, padding: 20, marginTop: 50, backgroundColor: "white" }}>
+      <Text style={{ fontSize: 24, fontWeight: "bold" }}>Todo List</Text>
+
       <TextInput
-  style={styles.searchBar}
-  placeholder="Search Here"
-  onChangeText={(newText) => setText(newText)}
-/>
-
-      <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
-        <View style={[styles.line, menuOpen && styles.lineOpen]} />
-        <View style={[styles.line, menuOpen && styles.lineOpen]} />
-        <View style={[styles.line, menuOpen && styles.lineOpen]} />
-      </TouchableOpacity>
-       
-      {menuOpen && (
-        <View style={styles.menu}>
-          {/* <Text>Profile</Text>
-          <Text>Settings</Text>
-          <Text>Help</Text>
-          <Text>About Us</Text> */}
-          <Tab.Navigator screenOptions={{ headerShown: false }}>
-      <Tab.Screen name="Profile" component={Profile} />
-      <Tab.Screen name="Settings" component={Settings} />
-      <Tab.Screen name="Help" component={Help} />
-      <Tab.Screen name="About Us" component={AboutUs} />
-      
-    </Tab.Navigator>
-    
-        </View>
-      )}
-      </View>
-      <Image
-        style={styles.image}
-        source={{ uri: "https://www.guideoftheworld.com/map/world/amp/world_map.jpg" }}
+        value={input}
+        onChangeText={setInput}
+        placeholder="Enter a todo..."
+        style={{
+          borderWidth: 1,
+          padding: 10,
+          marginVertical: 10,
+          borderRadius: 5,
+          backgroundColor: "#f9f9f9", // Light gray background for input
+        }}
       />
-      <Text style={styles.shophead}>Add Shopping List:</Text>
-    </SafeAreaView>
-  );
-};
-const Profile = () => {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Profile </Text>
-    </SafeAreaView>
-  );
-};
-const Settings = () => {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
-    </SafeAreaView>
-  );
-};
-const Help = () => {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Help</Text>
-    </SafeAreaView>
-  );
-};
-const AboutUs = () => {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>About Us</Text>
-    </SafeAreaView>
+
+      <Button title="Add Todo" onPress={addTodo} />
+
+      <FlatList
+        data={todos}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              padding: 10,
+              borderBottomWidth: 1,
+              backgroundColor: "#f0f0f0", // Light background for each item
+              borderRadius: 5,
+              marginVertical: 5,
+            }}
+          >
+            <Text>{item.todo}</Text>
+            <TouchableOpacity onPress={() => deleteTodo(item.id)}>
+              <Text style={{ color: "red" }}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      />
+    </View>
   );
 };
 
-const MVPPage = () => {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>MVP Page</Text>
-    </SafeAreaView>
-  );
-};
-const AskAI = () => {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Ask AI</Text>
-    </SafeAreaView>
-  );
-};
-
-// ✅ Create Bottom Tab Navigator
-const Tab = createBottomTabNavigator();
-
-const App = () => {
-  return (
-    <Tab.Navigator screenOptions={{ headerShown: false }}>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="MVP Page" component={MVPPage} />
-      <Tab.Screen name="Ask  AI" component={AskAI} />
-    </Tab.Navigator>
-
-  );
-};
-
-
-// ✅ Default Export to Fix the Error
 export default App;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#FFFFFF",
-    justifyContent: "flex-start",
-    paddingTop: 20,
-  },
-  menu: {
-    position: "absolute",
-    top: 50,
-    right: 10,
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 10,
-    elevation: 5,
-    width: 150,
-    zIndex: 2,
-  },
-  menuButton: {
-    position: "absolute",
-    top: 35,
-    right: 10,
-    width: 30,
-    height: 30,
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexDirection: "column",
-    zIndex : 2,
-  },
-  line: {
-    width: 30,
-    height: 5,
-    backgroundColor: "#333",
-  },
-  lineOpen: {
-    backgroundColor: "transparent",
-  },
-  image: {
-    width: "100%",
-    height: 500, // Covers from top to 500px
-    resizeMode: "cover", // Ensures it fully covers the space
-    position: "absolute",
-    top: 0,
-    zIndex: 0, // Moves it behind everything
-  },  
-  shophead: {
-    fontSize: 36,
-    // make the font to be bold
-    fontWeight: "bold",
-    zIndex: 1,
-    position: "absolute",
-    top: 500,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  searchBar: {
-    height: 45,
-    width: '80%',
-    alignSelf: 'auto',
-    backgroundColor: "white",
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    borderColor: 'gray',
-    borderWidth: 1,
-    position: "relative",
-    top: 30,
-    zIndex: 1,
-    
-    // Floating effect
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
-  },
-});
