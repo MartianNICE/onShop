@@ -39,7 +39,18 @@ const HomeScreen = () => {
        
       {menuOpen && (
         <View style={styles.menu}>
-          <Text>Menu Content</Text>
+          {/* <Text>Profile</Text>
+          <Text>Settings</Text>
+          <Text>Help</Text>
+          <Text>About Us</Text> */}
+          <Tab.Navigator screenOptions={{ headerShown: false }}>
+      <Tab.Screen name="Profile" component={Profile} />
+      <Tab.Screen name="Settings" component={Settings} />
+      <Tab.Screen name="Help" component={Help} />
+      <Tab.Screen name="About Us" component={AboutUs} />
+      
+    </Tab.Navigator>
+    
         </View>
       )}
       </View>
@@ -48,6 +59,34 @@ const HomeScreen = () => {
         source={{ uri: "https://www.guideoftheworld.com/map/world/amp/world_map.jpg" }}
       />
       <Text style={styles.shophead}>Add Shopping List:</Text>
+    </SafeAreaView>
+  );
+};
+const Profile = () => {
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Profile </Text>
+    </SafeAreaView>
+  );
+};
+const Settings = () => {
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Settings</Text>
+    </SafeAreaView>
+  );
+};
+const Help = () => {
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Help</Text>
+    </SafeAreaView>
+  );
+};
+const AboutUs = () => {
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>About Us</Text>
     </SafeAreaView>
   );
 };
@@ -77,6 +116,7 @@ const App = () => {
       <Tab.Screen name="MVP Page" component={MVPPage} />
       <Tab.Screen name="Ask  AI" component={AskAI} />
     </Tab.Navigator>
+
   );
 };
 
@@ -100,6 +140,7 @@ const styles = StyleSheet.create({
     padding: 10,
     elevation: 5,
     width: 150,
+    zIndex: 2,
   },
   menuButton: {
     position: "absolute",
