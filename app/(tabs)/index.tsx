@@ -26,10 +26,10 @@ const HomeScreen = () => {
     <SafeAreaView style={styles.container}>
       <View>
       <TextInput
-        style={{ height: 40, padding: 5, borderColor: 'gray', borderWidth: 1,position:"relative",top:30, }}
-        placeholder="Type here to translate!"
-        onChangeText={(newText) => setText(newText)}
-      />
+  style={styles.searchBar}
+  placeholder="Search Here"
+  onChangeText={(newText) => setText(newText)}
+/>
 
       <TouchableOpacity style={styles.menuButton} onPress={toggleMenu}>
         <View style={[styles.line, menuOpen && styles.lineOpen]} />
@@ -52,10 +52,17 @@ const HomeScreen = () => {
   );
 };
 
-const SettingsScreen = () => {
+const MVPPage = () => {
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
+      <Text style={styles.title}>MVP Page</Text>
+    </SafeAreaView>
+  );
+};
+const AskAI = () => {
+  return (
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Ask AI</Text>
     </SafeAreaView>
   );
 };
@@ -67,10 +74,12 @@ const App = () => {
   return (
     <Tab.Navigator screenOptions={{ headerShown: false }}>
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen name="MVP Page" component={MVPPage} />
+      <Tab.Screen name="Ask  AI" component={AskAI} />
     </Tab.Navigator>
   );
 };
+
 
 // ✅ Default Export to Fix the Error
 export default App;
@@ -94,13 +103,14 @@ const styles = StyleSheet.create({
   },
   menuButton: {
     position: "absolute",
-    top: 10,
+    top: 35,
     right: 10,
     width: 30,
     height: 30,
     justifyContent: "space-between",
     alignItems: "center",
     flexDirection: "column",
+    zIndex : 2,
   },
   line: {
     width: 30,
@@ -111,18 +121,43 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   image: {
-    width: "90%",
-    height: 250,
-    marginTop: 20,
-    resizeMode: "contain",
+    width: "100%",
+    height: 500, // Covers from top to 500px
+    resizeMode: "cover", // Ensures it fully covers the space
     position: "absolute",
-    top:0,
-  },
+    top: 0,
+    zIndex: 0, // Moves it behind everything
+  },  
   shophead: {
-    fontSize: 16,
+    fontSize: 36,
+    // make the font to be bold
+    fontWeight: "bold",
+    zIndex: 1,
+    position: "absolute",
+    top: 500,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
+  },
+  searchBar: {
+    height: 45,
+    width: '80%',
+    alignSelf: 'auto',
+    backgroundColor: "white",
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    borderColor: 'gray',
+    borderWidth: 1,
+    position: "relative",
+    top: 30,
+    zIndex: 1,
+    
+    // Floating effect
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 5,
   },
 });
